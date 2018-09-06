@@ -5,8 +5,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import org.springframework.web.filter.DelegatingFilterProxy;
-
 import pers.arjay.generator.serial.SerialNumberGenerator;
 
 public class SimpleSerialNumberGenerator implements SerialNumberGenerator {
@@ -18,7 +16,6 @@ public class SimpleSerialNumberGenerator implements SerialNumberGenerator {
 	private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
 	public SimpleSerialNumberGenerator() {
-		DelegatingFilterProxy
 		this.prefix = DEFAULT;
 	}
 
