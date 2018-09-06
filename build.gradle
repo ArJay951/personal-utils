@@ -1,0 +1,81 @@
+plugins {
+	id 'java'
+	id 'eclipse'
+	id "org.springframework.boot" version '2.0.3.RELEASE'
+	id "io.spring.dependency-management" version "1.0.5.RELEASE"
+}
+
+group = 'pers.arjay'
+sourceCompatibility = 1.8
+version = '0.0.1'
+
+repositories {
+	mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+	compile group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
+	
+	compile group: 'org.springframework', name: 'spring-web', version: '5.0.8.RELEASE'
+	
+	compile group: 'org.springframework', name: 'spring-context-support', version: '5.0.8.RELEASE'
+	
+	compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.0.7.RELEASE'
+	
+	compile group: 'org.springframework.data', name: 'spring-data-commons', version: '2.0.9.RELEASE'
+
+	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+	
+	compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
+	
+	compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+	compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.2'
+	
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+test {
+    systemProperties 'property': 'value'
+}
+
+// OS
+import org.gradle.internal.os.OperatingSystem;
+
+task checkWin() << {
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        println "*** WINDOWS "
+    }
+}
+
+// docker
+/*
+def dockerRepository = "10.10.1.31:8082"
+def dockerVersion = "latest";
+def volumePathPrefix = OperatingSystem.current().isWindows() ? 'c:' : ''
+
+dockerRun {
+    name 'otp-server'
+    image "$dockerRepository/otp:$dockerVersion"
+    volumes "${volumePathPrefix}/otp/logs":'/logs' , "${volumePathPrefix}/otp/config":'/config'
+    network 'host'
+    daemonize true
+    env 'spring.profiles.active': 'dev223', 'server.port':'8951', 'TZ':'Asia/Taipei'
+    command '--privileged=true'
+}
+*/
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'java personal utils',
+                   'Implementation-Version': version
+    }
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
