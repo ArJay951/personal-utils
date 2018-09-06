@@ -6,6 +6,10 @@ public class SampleException extends RuntimeException {
 	
 	private static final long serialVersionUID = 4892064115976876151L;
 
+	public SampleException(String message) {
+		super(message);
+	}
+	
 	public SampleException(String format, Object arg1) {
 		super(MessageFormatter.format(format, arg1).getMessage());
 	}
