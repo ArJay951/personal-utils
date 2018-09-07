@@ -7,12 +7,12 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
-import com.winterframework.firefrog.game.entity.GameSlip;
-import com.winterframework.firefrog.game.entity.MoneyMode;
-import com.winterframework.firefrog.game.exception.GameBetAmountErrorException;
-
+import pers.arjay.Separators;
 import pers.arjay.exception.SampleException;
+import pers.arjay.model.Slip;
+import pers.arjay.utils.CombinUtil;
 
 /**
  * <pre>
@@ -69,9 +69,9 @@ public class ValidateBuilder {
 
 	private String[] bets;
 
-	private Separator betSeparator;
+	private String betSeparator;
 
-	private Separator itemSeparator;
+	private String itemSeparator;
 
 	private Long betCounts;
 
@@ -81,9 +81,17 @@ public class ValidateBuilder {
 
 	private Integer unit = 1;
 
-	private MoneyMode moneyMode;
+	private SalesUnit salesUnit;
 
 	private int betCounter = 0;
+
+	private enum SalesUnit {
+		Yuan, jiao;
+
+		public static SalesUnit valueOf(int unit) {
+			return unit == 1 ? Yuan : jiao;
+		}
+	}
 
 	/**
 	 * 此建構子為無號切割，且不需拆細單如：
@@ -94,11 +102,11 @@ public class ValidateBuilder {
 	 * 
 	 * String[] bets = {"0","1","2","3"};
 	 * 
-	 * @param gameSlip
+	 * @param slip
 	 *            投注單
 	 */
-	public ValidateBuilder(GameSlip gameSlip) {
-		this(gameSlip, Separator.unsign, Separator.unsign, "");
+	public ValidateBuilder(Slip slip) {
+		this(slip, Separators.unsign, Separators.unsign, "");
 	}
 
 	/**
@@ -112,13 +120,13 @@ public class ValidateBuilder {
 	 * bets = {"01","02","03","04"};
 	 * </pre>
 	 * 
-	 * @param gameSlip
+	 * @param slip
 	 *            投注單
 	 * @param betSeparator
 	 *            split的regex參數
 	 */
-	public ValidateBuilder(GameSlip gameSlip, Separator betSeparator) {
-		this(gameSlip, betSeparator, Separator.unsign, "");
+	public ValidateBuilder(Slip slip, String betSeparator) {
+		this(slip, betSeparator, Separators.unsign, "");
 	}
 
 	/**
@@ -132,43 +140,44 @@ public class ValidateBuilder {
 	 * bets = {"01","02","03","04"};
 	 * </pre>
 	 * 
-	 * @param gameSlip
+	 * @param slip
 	 *            投注單
 	 * @param betSeparator
 	 *            split的regex參數
 	 * @param replace
 	 *            預設取代的文字
 	 */
-	public ValidateBuilder(GameSlip gameSlip, Separator betSeparator, String replace) {
-		this(gameSlip, betSeparator, Separator.unsign, replace);
+	public ValidateBuilder(Slip slip, String betSeparator, String replace) {
+		this(slip, betSeparator, Separators.unsign, replace);
 	}
 
-	/**
-	 * 根據傳入的分隔separator切割，如：
-	 * 
-	 * <pre>
-	 * String betSeparator = {@link Separator#comma};
-	 * 
-	 * String itemSeparator = {@link Separator#space};
-	 * 
-	 * String betDetail = "01 03,08 09,02 07,03 05,04 08";
-	 * 
-	 * bets = {"01 03","08 09","02 07","03 05","04 08"};
-	 * 
-	 * items = {{"01","03"},{"08","09"},{"02","07"},{"03","05"},{"04","08"}}
-	 * 
-	 * </pre>
-	 * 
-	 * @param gameSlip
-	 *            投注單
-	 * @param betSeparator
-	 *            split的regex參數
-	 * @param itemSeparator
-	 *            拆單的regex參數
-	 */
-	public ValidateBuilder(GameSlip gameSlip, Separator betSeparator, Separator itemSeparator) {
-		this(gameSlip, betSeparator, itemSeparator, "");
-	}
+	// /**
+	// * 根據傳入的分隔separator切割，如：
+	// *
+	// * <pre>
+	// * String betSeparator = {@link Separator#comma};
+	// *
+	// * String itemSeparator = {@link Separator#space};
+	// *
+	// * String betDetail = "01 03,08 09,02 07,03 05,04 08";
+	// *
+	// * bets = {"01 03","08 09","02 07","03 05","04 08"};
+	// *
+	// * items = {{"01","03"},{"08","09"},{"02","07"},{"03","05"},{"04","08"}}
+	// *
+	// * </pre>
+	// *
+	// * @param slip
+	// * 投注單
+	// * @param betSeparator
+	// * split的regex參數
+	// * @param itemSeparator
+	// * 拆單的regex參數
+	// */
+	// public ValidateBuilder(Slip slip, String betSeparator, String itemSeparator)
+	// {
+	// this(slip, betSeparator, itemSeparator, "");
+	// }
 
 	/**
 	 * 取代replace參數後再根據傳入的分隔separator切割，如：
@@ -187,24 +196,24 @@ public class ValidateBuilder {
 	 * 
 	 * </pre>
 	 * 
-	 * @param gameSlip
+	 * @param slip
 	 *            投注單
 	 * @param betSeparator
 	 *            split的regex參數
 	 * @param itemSeparator
 	 *            拆單的regex參數
 	 */
-	public ValidateBuilder(GameSlip gameSlip, Separator betSeparator, Separator itemSeparator, String replace) {
-		this.betCounts = gameSlip.getTotalBet();
-		this.betDetail = gameSlip.getBetDetail();
-		this.totalAmount = gameSlip.getTotalAmount();
-		this.multiple = gameSlip.getMultiple();
-		this.moneyMode = gameSlip.getMoneyMode();
+	public ValidateBuilder(Slip slip, String betSeparator, String itemSeparator, String replace) {
+		this.betCounts = slip.getBetCounts();
+		this.betDetail = slip.getBetDetail();
+		this.totalAmount = slip.getBetAmount();
+		this.multiple = slip.getMultiple();
+		this.salesUnit = SalesUnit.valueOf(slip.getSalesUnit());
 
 		this.betSeparator = betSeparator;
 		this.itemSeparator = itemSeparator;
 
-		this.bets = betDetail.split(betSeparator.regex());
+		this.bets = betDetail.split(betSeparator);
 
 		/* 如果一開始先取代資料後，切割出來的投注項會有問題 */
 		for (int i = 0; i < bets.length; i++) {
@@ -316,7 +325,7 @@ public class ValidateBuilder {
 
 	/** 投注內容不得為空 */
 	public ValidateBuilder betNotBlank() {
-		if (StringUtils.isBlank(betDetail)) {
+		if (!StringUtils.hasText(betDetail)) {
 			throw new SampleException("投注内容為空");
 		}
 
@@ -334,8 +343,8 @@ public class ValidateBuilder {
 	/** 透過分割運算後，細項須為數值 */
 	public ValidateBuilder itemIsNumber() {
 		for (String bet : bets) {
-			for (String item : bet.split(itemSeparator.regex())) {
-				if (StringUtils.isBlank(item)) {
+			for (String item : bet.split(itemSeparator)) {
+				if (!StringUtils.hasText(item)) {
 					continue;
 				}
 				if (!item.matches("[0-9]+")) {
@@ -356,8 +365,8 @@ public class ValidateBuilder {
 	 */
 	public ValidateBuilder itemNumberBetween(final int min, final int max) {
 		for (String bet : bets) {
-			for (String item : bet.split(itemSeparator.regex())) {
-				if (StringUtils.isBlank(item)) {
+			for (String item : bet.split(itemSeparator)) {
+				if (!StringUtils.hasText(item)) {
 					continue;
 				}
 
@@ -367,8 +376,8 @@ public class ValidateBuilder {
 						throw new SampleException("投注細項數值需落於{}～{}之間,細項内容為：{}", min, max, item);
 					}
 				} catch (NumberFormatException e) {
-					throw new SampleException("投注細項不為數值：{}, betSeparator:{}, itemSeparator:{}",
-							item, betSeparator, itemSeparator);
+					throw new SampleException("投注細項不為數值：{}, betSeparator:{}, itemSeparator:{}", item, betSeparator,
+							itemSeparator);
 				}
 			}
 		}
@@ -385,7 +394,7 @@ public class ValidateBuilder {
 	 */
 	public ValidateBuilder itemLengthBetween(int min, int max) {
 		for (String item : bets) {
-			Integer itemLength = item.split(itemSeparator.regex()).length;
+			Integer itemLength = item.split(itemSeparator).length;
 			if (itemLength < min || itemLength > max) {
 				throw new SampleException("細項長度需落於{}～{}之間,細項長度為：{}", min, max, item.length());
 			}
@@ -401,7 +410,7 @@ public class ValidateBuilder {
 	 */
 	public ValidateBuilder itemLengthEquals(int length) {
 		for (String item : bets) {
-			if (item.split(itemSeparator.regex()).length != length) {
+			if (item.split(itemSeparator).length != length) {
 				throw new SampleException("細項投注内容長度不為：{} , {}", length, item);
 			}
 		}
@@ -416,7 +425,7 @@ public class ValidateBuilder {
 	 */
 	public ValidateBuilder itemLengthGreatEqualsThen(int length) {
 		for (String item : bets) {
-			if (item.split(itemSeparator.regex()).length < length) {
+			if (item.split(itemSeparator).length < length) {
 				throw new SampleException("細項長度需大於{},細項長度為：{}", length, item.length());
 			}
 		}
@@ -431,7 +440,7 @@ public class ValidateBuilder {
 	 */
 	public ValidateBuilder itemLengthLessEqualsThen(int length) {
 		for (String item : bets) {
-			if (item.split(itemSeparator.regex()).length > length) {
+			if (item.split(itemSeparator).length > length) {
 				throw new SampleException("細項長度需小於{},細項長度為：{}", length, item.length());
 			}
 		}
@@ -441,7 +450,7 @@ public class ValidateBuilder {
 	/** 細項內容不得為空值 */
 	public ValidateBuilder itemNotBlank() {
 		for (String item : bets) {
-			if (StringUtils.isBlank(item)) {
+			if (!StringUtils.hasText(item)) {
 				throw new SampleException("投注細項為空");
 			}
 		}
@@ -453,8 +462,7 @@ public class ValidateBuilder {
 	 */
 	public ValidateBuilder itemNotRepeat() {
 		for (String item : bets) {
-			if (new HashSet<>(Arrays.asList(item.split(itemSeparator.regex())))
-					.size() != item.split(itemSeparator.regex()).length) {
+			if (new HashSet<>(Arrays.asList(item.split(itemSeparator))).size() != item.split(itemSeparator).length) {
 				throw new SampleException("細項有值重複, {}", item);
 			}
 		}
@@ -485,8 +493,7 @@ public class ValidateBuilder {
 
 		betCounter = CombinUtil.combin(bets.length, betLength);
 		if (betCounter != betCounts) {
-			throw new SampleException("[betCountsEqualsCombinBets] 投注注數不符：傳入注數{}, 計算注數：{}",
-					betCounts, betCounter);
+			throw new SampleException("[betCountsEqualsCombinBets] 投注注數不符：傳入注數{}, 計算注數：{}", betCounts, betCounter);
 		}
 
 		return this;
@@ -504,24 +511,24 @@ public class ValidateBuilder {
 	 * 
 	 * 參考驗證程式範例：
 	 * 
-	 * GameSlip gameSlip = new GameSlip(); 
-	 * gameSlip.setBetDetail("123,234,345");
-	 * gameSlip.setTotalBet(6L);
-	 * new ValidateBuilder(gameSlip, Separator.comma,Separator.unsign).betCountsEqualsPermutationItems();
+	 * Slip slip = new SampleSlip(); 
+	 * slip.setBetDetail("123,234,345");
+	 * slip.setTotalBet(6L);
+	 * new ValidateBuilder(slip, Separator.comma,Separator.unsign).betCountsEqualsPermutationItems();
 	 * </pre>
 	 */
 	public ValidateBuilder betCountsEqualsPermutationItems() {
 		this.checkBetCounterNotProcessed();
 
 		List<BetTree> tree = this.generatorBetTree();
-		
+
 		for (BetTree root : tree) {
 			betCounter += root.count(bets.length);
 		}
 
 		if (betCounter != betCounts) {
-			throw new SampleException("[betCountsEqualsPermutationItems] 投注注數不符：傳入注數{}, 計算注數：{}",
-					betCounts, betCounter);
+			throw new SampleException("[betCountsEqualsPermutationItems] 投注注數不符：傳入注數{}, 計算注數：{}", betCounts,
+					betCounter);
 		}
 
 		return this;
@@ -534,14 +541,13 @@ public class ValidateBuilder {
 		this.checkBetCounterNotProcessed();
 
 		for (String bet : bets) {
-			if (!StringUtils.isBlank(bet)) {
-				betCounter += bet.split(itemSeparator.regex()).length;
+			if (!StringUtils.hasText(bet)) {
+				betCounter += bet.split(itemSeparator).length;
 			}
 		}
 
 		if (this.betCounts != betCounter) {
-			throw new SampleException("[betCountsEqualsSumItems] 投注注數不符：{}:{}", betCounts,
-					betCounter);
+			throw new SampleException("[betCountsEqualsSumItems] 投注注數不符：{}:{}", betCounts, betCounter);
 		}
 		return this;
 	}
@@ -552,9 +558,9 @@ public class ValidateBuilder {
 	public ValidateBuilder totalAmountValid() {
 		this.checkBetCounterIsProcessed();
 
-		if (totalAmount != (betCounter * multiple * unit * (moneyMode == MoneyMode.YUAN ? 10000L : 1000L))) {
-			throw new GameBetAmountErrorException("[AmountEqualsBetCalculate]投注金额不对:{}:{}", totalAmount,
-					betCounter * multiple * unit * (moneyMode == MoneyMode.YUAN ? 10000L : 1000L));
+		if (totalAmount != (betCounter * multiple * unit * (salesUnit == SalesUnit.Yuan ? 10000L : 1000L))) {
+			throw new SampleException("[AmountEqualsBetCalculate]投注金额不对:{}:{}", totalAmount,
+					betCounter * multiple * unit * (salesUnit == SalesUnit.Yuan ? 10000L : 1000L));
 		}
 		return this;
 	}
@@ -591,12 +597,12 @@ public class ValidateBuilder {
 
 		for (int level = 0; level < bets.length; level++) {
 			if (CollectionUtils.isEmpty(tree)) {
-				for (String root : bets[level].split(itemSeparator.regex())) {
+				for (String root : bets[level].split(itemSeparator)) {
 					tree.add(new BetTree(root));
 				}
 			} else {
 				for (BetTree root : tree) {
-					for (String item : bets[level].split(itemSeparator.regex())) {
+					for (String item : bets[level].split(itemSeparator)) {
 						root.addNode(level, item);
 					}
 				}
@@ -607,14 +613,14 @@ public class ValidateBuilder {
 	}
 
 	public ValidateBuilder isSingleNote() {
-		if (betDetail.split(itemSeparator.comma.toString()).length > 1) {
+		if (betDetail.split(Separators.comma).length > 1) {
 			throw new SampleException("投注项目不得为复式。");
 		}
 		return this;
 	}
-	
+
 	public String[] getBets() {
 		return bets;
 	}
-	
+
 }
