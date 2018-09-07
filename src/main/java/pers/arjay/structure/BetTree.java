@@ -6,6 +6,9 @@ import java.util.HashSet;
 
 import org.springframework.util.CollectionUtils;
 
+import lombok.ToString;
+
+@ToString
 public class BetTree {
 
 	private static final int root = 0;
@@ -72,19 +75,6 @@ public class BetTree {
 				child.addNode(level, value, repeatable);
 			}
 		}
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("BetTree [value=");
-		builder.append(value);
-		builder.append(", level=");
-		builder.append(level);
-		builder.append(", childs=");
-		builder.append(childs);
-		builder.append("]");
-		return builder.toString();
 	}
 
 }

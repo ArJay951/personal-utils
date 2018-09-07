@@ -63,7 +63,7 @@ import pers.arjay.utils.CombinUtil;
  * @author jay.kuo
  * @date 2017.10.02
  */
-public class ValidateBuilder {
+public class ValidateChain {
 
 	private String betDetail;
 
@@ -105,7 +105,7 @@ public class ValidateBuilder {
 	 * @param slip
 	 *            投注單
 	 */
-	public ValidateBuilder(Slip slip) {
+	public ValidateChain(Slip slip) {
 		this(slip, Separators.unsign, Separators.unsign, "");
 	}
 
@@ -125,7 +125,7 @@ public class ValidateBuilder {
 	 * @param betSeparator
 	 *            split的regex參數
 	 */
-	public ValidateBuilder(Slip slip, String betSeparator) {
+	public ValidateChain(Slip slip, String betSeparator) {
 		this(slip, betSeparator, Separators.unsign, "");
 	}
 
@@ -147,7 +147,7 @@ public class ValidateBuilder {
 	 * @param replace
 	 *            預設取代的文字
 	 */
-	public ValidateBuilder(Slip slip, String betSeparator, String replace) {
+	public ValidateChain(Slip slip, String betSeparator, String replace) {
 		this(slip, betSeparator, Separators.unsign, replace);
 	}
 
@@ -203,7 +203,7 @@ public class ValidateBuilder {
 	 * @param itemSeparator
 	 *            拆單的regex參數
 	 */
-	public ValidateBuilder(Slip slip, String betSeparator, String itemSeparator, String replace) {
+	public ValidateChain(Slip slip, String betSeparator, String itemSeparator, String replace) {
 		this.betCounts = slip.getBetCounts();
 		this.betDetail = slip.getBetDetail();
 		this.totalAmount = slip.getBetAmount();
@@ -228,7 +228,7 @@ public class ValidateBuilder {
 	 * @param values
 	 *            驗證集合
 	 */
-	public ValidateBuilder betIn(final Collection<String> values) {
+	public ValidateChain betIn(final Collection<String> values) {
 		for (String bet : bets) {
 			if (!values.contains(bet)) {
 				throw new SampleException("投注内容有誤，錯誤項目:{}", bet);
@@ -245,7 +245,7 @@ public class ValidateBuilder {
 	 * @param max
 	 *            最大值
 	 */
-	public ValidateBuilder betNumberBetween(final int min, final int max) {
+	public ValidateChain betNumberBetween(final int min, final int max) {
 		for (String bet : bets) {
 			try {
 				Integer betNumber = Integer.parseInt(bet);
@@ -260,7 +260,7 @@ public class ValidateBuilder {
 	}
 
 	/** 投注內容須為數值 */
-	public ValidateBuilder betIsNumber() {
+	public ValidateChain betIsNumber() {
 		for (String bet : bets) {
 			if (!bet.matches("[0-9]+")) {
 				throw new SampleException("內含不為數值之文字：{}, separator:{}", betDetail, betSeparator);
@@ -277,7 +277,7 @@ public class ValidateBuilder {
 	 * @param max
 	 *            最大長度
 	 */
-	public ValidateBuilder betLengthBetween(int min, int max) {
+	public ValidateChain betLengthBetween(int min, int max) {
 		if (bets.length < min || bets.length > max) {
 			throw new SampleException("長度需落於{}～{}之間,投注内容長度為：{}", min, max, bets.length);
 		}
@@ -290,7 +290,7 @@ public class ValidateBuilder {
 	 * @param length
 	 *            驗證長度
 	 */
-	public ValidateBuilder betLengthEquals(int length) {
+	public ValidateChain betLengthEquals(int length) {
 		if (bets.length != length) {
 			throw new SampleException("投注内容長度不為：{} bets:{}", length, bets.length);
 		}
@@ -303,7 +303,7 @@ public class ValidateBuilder {
 	 * @param length
 	 *            驗證長度
 	 */
-	public ValidateBuilder betLengthGreatEqualsThen(int length) {
+	public ValidateChain betLengthGreatEqualsThen(int length) {
 		if (bets.length < length) {
 			throw new SampleException("長度需大於{},投注内容長度為：{}", length, bets.length);
 		}
@@ -316,7 +316,7 @@ public class ValidateBuilder {
 	 * @param length
 	 *            驗證長度
 	 */
-	public ValidateBuilder betLengthLessEqualsThen(int length) {
+	public ValidateChain betLengthLessEqualsThen(int length) {
 		if (bets.length > length) {
 			throw new SampleException("長度需小於{},投注内容長度為：{}", length, bets.length);
 		}
@@ -324,7 +324,7 @@ public class ValidateBuilder {
 	}
 
 	/** 投注內容不得為空 */
-	public ValidateBuilder betNotBlank() {
+	public ValidateChain betNotBlank() {
 		if (!StringUtils.hasText(betDetail)) {
 			throw new SampleException("投注内容為空");
 		}
@@ -333,7 +333,7 @@ public class ValidateBuilder {
 	}
 
 	/** 投注內容不得重複 */
-	public ValidateBuilder betNotRepeat() {
+	public ValidateChain betNotRepeat() {
 		if (new HashSet<>(Arrays.asList(bets)).size() != bets.length) {
 			throw new SampleException("投注内容有值重複,{}", betDetail);
 		}
@@ -341,7 +341,7 @@ public class ValidateBuilder {
 	}
 
 	/** 透過分割運算後，細項須為數值 */
-	public ValidateBuilder itemIsNumber() {
+	public ValidateChain itemIsNumber() {
 		for (String bet : bets) {
 			for (String item : bet.split(itemSeparator)) {
 				if (!StringUtils.hasText(item)) {
@@ -363,7 +363,7 @@ public class ValidateBuilder {
 	 * @param max
 	 *            最大值
 	 */
-	public ValidateBuilder itemNumberBetween(final int min, final int max) {
+	public ValidateChain itemNumberBetween(final int min, final int max) {
 		for (String bet : bets) {
 			for (String item : bet.split(itemSeparator)) {
 				if (!StringUtils.hasText(item)) {
@@ -392,7 +392,7 @@ public class ValidateBuilder {
 	 * @param max
 	 *            最大長度
 	 */
-	public ValidateBuilder itemLengthBetween(int min, int max) {
+	public ValidateChain itemLengthBetween(int min, int max) {
 		for (String item : bets) {
 			Integer itemLength = item.split(itemSeparator).length;
 			if (itemLength < min || itemLength > max) {
@@ -408,7 +408,7 @@ public class ValidateBuilder {
 	 * @param length
 	 *            驗證長度
 	 */
-	public ValidateBuilder itemLengthEquals(int length) {
+	public ValidateChain itemLengthEquals(int length) {
 		for (String item : bets) {
 			if (item.split(itemSeparator).length != length) {
 				throw new SampleException("細項投注内容長度不為：{} , {}", length, item);
@@ -423,7 +423,7 @@ public class ValidateBuilder {
 	 * @param length
 	 *            驗證長度
 	 */
-	public ValidateBuilder itemLengthGreatEqualsThen(int length) {
+	public ValidateChain itemLengthGreatEqualsThen(int length) {
 		for (String item : bets) {
 			if (item.split(itemSeparator).length < length) {
 				throw new SampleException("細項長度需大於{},細項長度為：{}", length, item.length());
@@ -438,7 +438,7 @@ public class ValidateBuilder {
 	 * @param length
 	 *            驗證長度
 	 */
-	public ValidateBuilder itemLengthLessEqualsThen(int length) {
+	public ValidateChain itemLengthLessEqualsThen(int length) {
 		for (String item : bets) {
 			if (item.split(itemSeparator).length > length) {
 				throw new SampleException("細項長度需小於{},細項長度為：{}", length, item.length());
@@ -448,7 +448,7 @@ public class ValidateBuilder {
 	}
 
 	/** 細項內容不得為空值 */
-	public ValidateBuilder itemNotBlank() {
+	public ValidateChain itemNotBlank() {
 		for (String item : bets) {
 			if (!StringUtils.hasText(item)) {
 				throw new SampleException("投注細項為空");
@@ -460,7 +460,7 @@ public class ValidateBuilder {
 	/**
 	 * 透過分割運算後，細項不得重複
 	 */
-	public ValidateBuilder itemNotRepeat() {
+	public ValidateChain itemNotRepeat() {
 		for (String item : bets) {
 			if (new HashSet<>(Arrays.asList(item.split(itemSeparator))).size() != item.split(itemSeparator).length) {
 				throw new SampleException("細項有值重複, {}", item);
@@ -471,7 +471,7 @@ public class ValidateBuilder {
 	}
 
 	/** 投注注數等於計算注數 */
-	public ValidateBuilder betCountsEqualsBets() {
+	public ValidateChain betCountsEqualsBets() {
 		this.checkBetCounterNotProcessed();
 
 		betCounter = bets.length;
@@ -488,7 +488,7 @@ public class ValidateBuilder {
 	 * @param betLength
 	 *            需投注長度 (m值)
 	 */
-	public ValidateBuilder betCountsEqualsCombinBets(Integer betLength) {
+	public ValidateChain betCountsEqualsCombinBets(Integer betLength) {
 		this.checkBetCounterNotProcessed();
 
 		betCounter = CombinUtil.combin(bets.length, betLength);
@@ -517,7 +517,7 @@ public class ValidateBuilder {
 	 * new ValidateBuilder(slip, Separator.comma,Separator.unsign).betCountsEqualsPermutationItems();
 	 * </pre>
 	 */
-	public ValidateBuilder betCountsEqualsPermutationItems() {
+	public ValidateChain betCountsEqualsPermutationItems() {
 		this.checkBetCounterNotProcessed();
 
 		List<BetTree> tree = this.generatorBetTree();
@@ -537,7 +537,7 @@ public class ValidateBuilder {
 	/**
 	 * 透過分割運算後，投注注數等於細項注數
 	 */
-	public ValidateBuilder betCountsEqualsSumItems() {
+	public ValidateChain betCountsEqualsSumItems() {
 		this.checkBetCounterNotProcessed();
 
 		for (String bet : bets) {
@@ -555,7 +555,7 @@ public class ValidateBuilder {
 	/**
 	 * 需先執行betCounts* 相關驗證。
 	 */
-	public ValidateBuilder totalAmountValid() {
+	public ValidateChain totalAmountValid() {
 		this.checkBetCounterIsProcessed();
 
 		if (totalAmount != (betCounter * multiple * unit * (salesUnit == SalesUnit.Yuan ? 10000L : 1000L))) {
@@ -572,7 +572,7 @@ public class ValidateBuilder {
 	 *            每注單位價格
 	 * 
 	 */
-	public ValidateBuilder setUnit(Integer unit) {
+	public ValidateChain setUnit(Integer unit) {
 		this.unit = unit;
 		return this;
 	}
@@ -612,7 +612,7 @@ public class ValidateBuilder {
 		return tree;
 	}
 
-	public ValidateBuilder isSingleNote() {
+	public ValidateChain isSingleNote() {
 		if (betDetail.split(Separators.comma).length > 1) {
 			throw new SampleException("投注项目不得为复式。");
 		}
