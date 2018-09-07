@@ -5,9 +5,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import pers.arjay.generator.serial.SerialNumberGenerator;
+import pers.arjay.generator.serial.SerialGenerator;
 
-public class SimpleSerialNumberGenerator implements SerialNumberGenerator {
+public class SimpleSerialGenerator implements SerialGenerator {
 
 	public static final String DEFAULT = "SN";
 
@@ -15,11 +15,11 @@ public class SimpleSerialNumberGenerator implements SerialNumberGenerator {
 	
 	private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-	public SimpleSerialNumberGenerator() {
+	public SimpleSerialGenerator() {
 		this.prefix = DEFAULT;
 	}
 
-	public SimpleSerialNumberGenerator(String prefix) {
+	public SimpleSerialGenerator(String prefix) {
 		this.prefix = prefix;
 	}
 
