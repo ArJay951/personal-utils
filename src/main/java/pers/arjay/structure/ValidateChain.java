@@ -324,7 +324,7 @@ public class ValidateChain {
 	}
 
 	/** 投注內容不得為空 */
-	public ValidateChain betNotBlank() {
+	public ValidateChain betHasText() {
 		if (!StringUtils.hasText(betDetail)) {
 			throw new SampleException("投注内容為空");
 		}
