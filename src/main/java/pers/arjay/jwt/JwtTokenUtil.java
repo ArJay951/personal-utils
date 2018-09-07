@@ -28,7 +28,7 @@ public class JwtTokenUtil implements Serializable {
 	/**
 	 * 密鑰
 	 */
-	private final String secret = "boya-kai-room";
+	private final String secret = "jwtTokenSecret";
 
 	/**
 	 * 從數據聲明生成令牌
