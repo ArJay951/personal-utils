@@ -37,7 +37,7 @@ public class SimpleQueueTaskExecutor implements MultipleQueueTaskExecutor {
 	public ThreadPoolTaskExecutor getExcutorByUserId(Long userId) {
 		return threadPoolTasks[userId.intValue() % poolSize];
 	}
-	
+
 	public void close() throws InterruptedException {
 		log.info("shutdowning executors...");
 		for (int i = 0; i < poolSize; i++) {
@@ -51,7 +51,7 @@ public class SimpleQueueTaskExecutor implements MultipleQueueTaskExecutor {
 
 	@Override
 	public ThreadPoolTaskExecutor getExcutorByUserIds(Collection<Long> userIds) {
-		return threadPoolTasks[Math.abs((int)userIds.stream().mapToLong(user->user.longValue()).sum()) % poolSize];
+		return threadPoolTasks[Math.abs((int) userIds.stream().mapToLong(user -> user.longValue()).sum()) % poolSize];
 	}
 
 }
