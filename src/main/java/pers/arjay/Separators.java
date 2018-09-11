@@ -17,7 +17,7 @@ public interface Separators {
 	/** 空白 */
 	String space = " ";
 	
-	/** 減號 */
-	String desh = "-";
+	/** 連接號 */
+	String hyphen = "-";
 
 }
